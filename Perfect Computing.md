@@ -70,3 +70,7 @@ There's also the initialization problem: a program needs resources, which often 
 When programmers figure out those dependencies, they can't know for sure if they got it right.
 If anything changes they have to figure them out again.
 Because it keeps track of effects, Effect Systems solve that problem, provably.
+
+- We're not getting enough information from the function.
+  Put that information in the return value.
+  Types are essential here, because they manage the information in that return value.
