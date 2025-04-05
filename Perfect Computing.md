@@ -39,4 +39,15 @@ Programmers spend far too much time managing messes to even hope for a system th
 
 Rather than manage the messes, we want to keep them from happening in the first place.
 We need to pay attention to the things that are making the messes.
-An *effect system* does that for you--it plugs the leaks.
+An *Effect System* does that for you--it plugs the leaks.
+
+What are these leaks?
+Exceptions are an obvious leak because they just blow everything up and show up later ... somewhere.
+Hoping that someone pays attention to it, like a drunken partygoer after an all-nighter.
+Any sort of IO, from console to network, leaks its bytes out into the world, and leaves a mess.
+
+Perhaps surprisingly, *reading* from the world is also a side effect, because that information changes the result produced, which in turn changes the rest of the system.
+An impure function is unpredictable; because of the impurity you can call it multiple times with the same inputs and not get the same results.
+
+A program of pure functions is pointless: it never touches the world, so it cannot influence the world, except to warm it slightly.
+Impurity is essential, but our problem isn't impurity, it's ignoring side effects.
