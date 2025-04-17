@@ -1,5 +1,7 @@
 # Introduction to Effect-Oriented Programming (EOP)
 
+(Machine generated, as a resource)
+
 In traditional programming, side effects (such as I/O operations, state mutations, or error throwing) are often interwoven with business logic, making programs *unpredictable* and harder to maintain.
 Effect-Oriented Programming (EOP) treats **side effects** as first-class, manageable components of software.
 EOP explicitly **separates side effects from pure logic**, providing a structured way to handle the unpredictable parts of a system ([Effect-Oriented Programming](https://developersummit.com/session/effect-oriented-programming#:~:text=A%20new%20paradigm%20called%20Effect,handling%20errors%2C%20applying%20timeouts%20and)) ([Functional Programming FAQ: What are the benefits of an Effect System, like ZIO? | alvinalexander.com](https://alvinalexander.com/scala/functional-programming-faq-what-are-benefits-of-effect-system-zio/#:~:text=,separately%20from%20the%20predictable%20ones)).
