@@ -13,7 +13,7 @@ type Robot  = {
   action(): string 
 }
 
-// Class Version (findable by instanceof):
+// Only a class is findable by instanceof:
 class RobotClass implements Robot {
   constructor(public name: string, private emits: string) {}
   action(): string {
@@ -36,11 +36,12 @@ const mix = [
   r2
 ]
 
-// instanceof only works for class objects,
-// only finds RobotClass:
-for (const ra of mix)
-  if(ra instanceof RobotClass)
-    console.log("instanceof:", ra.name, ra.action())
+let count = 1
+
+// Only class objects are recognized by instanceof:
+for (const r of mix)
+  if(r instanceof RobotClass)
+    console.log(`${count++}: [instanceof]`, r.name, r.action())
 
 // Structural shape guard, works for all Robot shapes:
 function isRobot(x: any): x is Robot {
@@ -53,15 +54,29 @@ function isRobot(x: any): x is Robot {
   )
 }
 
-for(const rb of mix)
-  if(isRobot(rb))
-    console.log("shape:", rb.name, rb.action())
+for(const r of mix)
+  if(isRobot(r))
+    console.log(`${count++}: [isRobot]`, r.name, r.action())
 ```
 
-You cannot use instanceof with type aliases — only classes have runtime constructors. So `r instanceof Robot` won't compile.
+```console
+[LOG]: "1: [instanceof]",  "R2D2",  "beeps" 
+[LOG]: "2: [isRobot]",  "Alice",  "talks" 
+[LOG]: "3: [isRobot]",  "Bob",  "monologues" 
+[LOG]: "4: [isRobot]",  "C3PO",  "informs" 
+[LOG]: "5: [isRobot]",  "R2D2",  "beeps" 
+```
+
+You cannot use `instanceof` with type aliases.
+Only classes have runtime constructors so `r instanceof Robot` won't compile.
+
+In TypeScript, a type tag (also known as a discriminant) is usually a string literal, and using a string literal provides the strongest type narrowing capabilities. 
+Although the tag can be any literal type (including numbers, booleans, or even enums), discriminated unions work best with string literal tags.
+The TypeScript compiler recognizes string literals more directly when narrowing union types with `switch` or `if`.
 
 ```ts
-// TaggedRobotFinder.ts
+// RobotFinderTagged.ts
+
 type Person = {
   kind: "person"
   name: string
@@ -102,10 +117,12 @@ const mix: unknown[] = [
   r3
 ]
 
+let count = 1
+
 // instanceof still only works for classes:
-for (const ra of mix)
-  if (ra instanceof RobotClass)
-    console.log("instanceof RobotClass", ra.name, ra.action())
+for (const r of mix)
+  if (r instanceof RobotClass)
+    console.log(`${count++}: [instanceof] ${r.name} ${r.action()}`)
 
 //  type guard for robot:
 function isTaggedRobot(x: any): x is Robot {
@@ -114,9 +131,9 @@ function isTaggedRobot(x: any): x is Robot {
 
 
 // Finds only Robot objects using "trusted discriminant":
-for (const rt of mix)
-  if (isTaggedRobot(rt))
-    console.log("[Robot (trusted)]", rt.name, rt.action())
+for (const r of mix)
+  if (isTaggedRobot(r))
+    console.log(`${count++}: [Robot (trusted)] ${r.name} ${r.action()}`)
 
 
 function isTaggedPerson(x: any): x is Person {
@@ -124,12 +141,15 @@ function isTaggedPerson(x: any): x is Person {
 }
 
 for (const p of mix)
-  if (isTaggedPerson(p)) 
-    try { 
-      console.log("[Person (trusted)]", p.name, p.action()) 
-    } catch (err) { 
-      console.log("[Person (trusted)]", err, p) 
+  if (isTaggedPerson(p)) {
+    const line = count++
+    try {
+      console.log(`${line}: [Person (trusted)] ${p.name} ${p.action()}`)
+    } catch (err) {
+      console.log(`${line}: [Person (trusted)]\n${err}:\n${JSON.stringify(p)}`)
     }
+  }
+
 
 //  Thorough type guard for person:
 function isPerson(x: any): x is Person {
@@ -147,5 +167,22 @@ function isPerson(x: any): x is Person {
 // Finds only Person objects:
 for (const p of mix)
   if (isPerson(p))
-    console.log("[Person (thorough)]", p.name, p.action())
+    console.log(`${count++}: [Person (thorough)] ${p.name} ${p.action()}`)
+```
+
+```console
+[LOG]: "1: [instanceof] R2D2 beeps" 
+[LOG]: "2: [Robot (trusted)] 11 42" 
+[LOG]: "3: [Robot (trusted)] C3PO informs" 
+[LOG]: "4: [Robot (trusted)] K2SO undefined" 
+[LOG]: "5: [Robot (trusted)] R2D2 beeps" 
+[LOG]: "6: [Robot (trusted)] T800 terminates" 
+[LOG]: "7: [Person (trusted)] Alice talks" 
+[LOG]: "8: [Person (trusted)] Bob monologues" 
+[LOG]: "9: [Person (trusted)]
+TypeError: p.action is not a function:
+{"kind":"person","name":"NotAPerson","action":99}" 
+[LOG]: "10: [Person (trusted)] BadReturn 111" 
+[LOG]: "11: [Person (thorough)] Alice talks" 
+[LOG]: "12: [Person (thorough)] Bob monologues" 
 ```
