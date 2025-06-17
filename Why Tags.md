@@ -30,8 +30,6 @@ const mix = [
   new RobotClass("R2D2", "beeps")
 ]
 
-let count = 1
-
 // Only a constructed class object is findable by instanceof:
 mix.forEach((item, index) => {
   if(item instanceof RobotClass)
@@ -72,7 +70,6 @@ The TypeScript compiler recognizes string literals more directly when narrowing 
 
 ```ts
 // TaggedRobotFinder.ts
-
 type Person = {
   kind: "person"
   name: string
@@ -85,7 +82,6 @@ type Robot = {
   action(): string
 }
 
-// Class Version (findable by instanceof):
 class RobotClass implements Robot {
   kind: "robot" = "robot"
   constructor(public name: string, private emits: string) {}
@@ -94,57 +90,52 @@ class RobotClass implements Robot {
   }
 }
 
-const p1: Person = { kind: "person", name: "Alice", action: () => "talks" }
-const p2: Person = { kind: "person", name: "Bob", action: () => "monologues" }
-const r1: Robot = { kind: "robot", name: "C3PO", action: () => "informs" }
-const r2 = new RobotClass("R2D2", "beeps")
-const r3: Robot = { kind: "robot", name: "T800", action: () => "terminates" }
-
 const mix: unknown[] = [
-  p1,
-  { kind: "robot", name: 11, action: () => 42 },
-  p2,
-  { kind: "person", name: "NotAPerson", action: 99 },
-  { kind: "person", name: "BadReturn", action: () => 111 },
-  r1,
-  { kind: "robot", name: "K2SO", action: (x: string) => `${x}` },
-  r2,
-  { name: "WALL-E", action: () => "cleans" },
-  r3
+  new RobotClass("R2D2", "beeps"),
+  { kind: "person", name: "Alice", action: () => "talks" } as Person,
+  { kind: "robot", name: 11, action: () => 42 }, // as Robot fails
+  { kind: "person", name: "Bob", action: () => "monologues" } as Person,
+  { kind: "person", name: "NotAPerson", action: 99 }, // as Person fails
+  { kind: "person", name: "BadReturn", action: () => 111 }, // as Person fails
+  { name: "Morty", action: () => "aw geez" } as Person,
+  { kind: "robot", name: "C3PO", action: () => "informs" } as Robot,
+  { kind: "robot", name: "K2SO", action: (x: string) => `${x}` } as Robot,
+  { name: "WALL-E", action: () => "cleans" } as Robot,
+  { kind: "robot", name: "T800", action: () => "terminates" } as Robot
 ]
 
-let count = 1
-
 // instanceof still only works for classes:
-for (const r of mix)
-  if (r instanceof RobotClass)
-    console.log(`${count++}: [instanceof] ${r.name} ${r.action()}`)
+mix.forEach((item, index) => {
+  if (item instanceof RobotClass)
+    console.log(`${index}: [instanceof]`, item.name, item.action())
+})
 
-//  type guard for robot:
+// Robot type guard:
 function isTaggedRobot(x: any): x is Robot {
   return x?.kind === "robot"
 }
 
-// Finds only Robot objects using "trusted discriminant":
-for (const r of mix)
-  if (isTaggedRobot(r))
-    console.log(`${count++}: [Robot (trusted)] ${r.name} ${r.action()}`)
+// Finds Robot objects using "trusted discriminant":
+mix.forEach((item, index) => {
+  if (isTaggedRobot(item))
+    console.log(`${index}: [Robot (trusted)] `, item.name, item.action())
+})
 
 function isTaggedPerson(x: any): x is Person {
   return x?.kind === "person"
 }
 
-for (const p of mix)
-  if (isTaggedPerson(p)) {
-    const line = count++
+mix.forEach((item, index) => {
+  if (isTaggedPerson(item)) {
     try {
-      console.log(`${line}: [Person (trusted)] ${p.name} ${p.action()}`)
+      console.log(`${index}: [Person (trusted)]`, item.name, item.action())
     } catch (err) {
-      console.log(`${line}: [Person (trusted)]\n${err}:\n${JSON.stringify(p)}`)
+      console.log(`${index}: [Person (trusted)]\n${err}:\n${JSON.stringify(item)}`)
     }
   }
+})
 
-//  Thorough type guard for person:
+// Thorough type guard for person:
 function isPerson(x: any): x is Person {
   return (
     typeof x === "object" &&
@@ -152,30 +143,30 @@ function isPerson(x: any): x is Person {
     x.kind === "person" &&
     typeof x.name === "string" &&
     typeof x.action === "function" &&
-    x.action.length === 0 &&
-    typeof x.action() === "string"
+    typeof x.action() === "string"  &&
+    x.action.length === 0
   )
 }
 
-// Finds only Person objects:
-for (const p of mix)
-  if (isPerson(p))
-    console.log(`${count++}: [Person (thorough)] ${p.name} ${p.action()}`)
+mix.forEach((item, index) => {
+  if (isPerson(item))
+    console.log(`${index}: [Person (thorough)]`, item.name, item.action())
+})
 ```
 
 ```console
-[LOG]: "1: [instanceof] R2D2 beeps" 
-[LOG]: "2: [Robot (trusted)] 11 42" 
-[LOG]: "3: [Robot (trusted)] C3PO informs" 
-[LOG]: "4: [Robot (trusted)] K2SO undefined" 
-[LOG]: "5: [Robot (trusted)] R2D2 beeps" 
-[LOG]: "6: [Robot (trusted)] T800 terminates" 
-[LOG]: "7: [Person (trusted)] Alice talks" 
-[LOG]: "8: [Person (trusted)] Bob monologues" 
-[LOG]: "9: [Person (trusted)]
-TypeError: p.action is not a function:
+[LOG]: "0: [instanceof]",  "R2D2",  "beeps" 
+[LOG]: "0: [Robot (trusted)] ",  "R2D2",  "beeps" 
+[LOG]: "2: [Robot (trusted)] ",  11,  42 
+[LOG]: "7: [Robot (trusted)] ",  "C3PO",  "informs" 
+[LOG]: "8: [Robot (trusted)] ",  "K2SO",  "undefined" 
+[LOG]: "10: [Robot (trusted)] ",  "T800",  "terminates" 
+[LOG]: "1: [Person (trusted)]",  "Alice",  "talks" 
+[LOG]: "3: [Person (trusted)]",  "Bob",  "monologues" 
+[LOG]: "4: [Person (trusted)]
+TypeError: item.action is not a function:
 {"kind":"person","name":"NotAPerson","action":99}" 
-[LOG]: "10: [Person (trusted)] BadReturn 111" 
-[LOG]: "11: [Person (thorough)] Alice talks" 
-[LOG]: "12: [Person (thorough)] Bob monologues" 
+[LOG]: "5: [Person (trusted)]",  "BadReturn",  111 
+[LOG]: "1: [Person (thorough)]",  "Alice",  "talks" 
+[LOG]: "3: [Person (thorough)]",  "Bob",  "monologues" 
 ```
