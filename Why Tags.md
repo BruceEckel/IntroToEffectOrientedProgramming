@@ -13,7 +13,6 @@ type Robot  = {
   action(): string 
 }
 
-// Only a class is findable by instanceof:
 class RobotClass implements Robot {
   constructor(public name: string, private emits: string) {}
   action(): string {
@@ -21,27 +20,23 @@ class RobotClass implements Robot {
   }
 }
 
-const p1: Person = { name: "Alice", action: () => "talks" }
-const p2: Person = { name: "Bob", action: () => "monologues" }
-const r1: Robot  = { name: "C3PO",  action: () => "informs" }
-const r2 = new RobotClass("R2D2", "beeps")
-
 const mix = [
-  p1, 
-  { name: 11, action: () => 42 }, 
-  p2, 
-  { name: "?", action: 99 }, 
-  r1, 
-  { name: "K2SO", action: (x: string) => `${x}`}, 
-  r2
+  { name: "Alice", action: () => "talks" } as Person,
+  { name: 11, action: () => 42 },  // 'as' gives type error
+  { name: "Bob", action: () => "monologues" } as Person,
+  { name: "?", action: 99 },  // 'as' gives type error
+  { name: "C3PO", action: () => "informs" } as Robot,
+  { name: "K2SO", action: (x: string) => `${x}` } as Robot,
+  new RobotClass("R2D2", "beeps")
 ]
 
 let count = 1
 
-// Only class objects are recognized by instanceof:
-for (const r of mix)
-  if(r instanceof RobotClass)
-    console.log(`${count++}: [instanceof]`, r.name, r.action())
+// Only a constructed class object is findable by instanceof:
+mix.forEach((item, index) => {
+  if(item instanceof RobotClass)
+    console.log(`${index}: [instanceof]`, item.name, item.action())
+})
 
 // Structural shape guard, works for all Robot shapes:
 function isRobot(x: any): x is Robot {
@@ -54,17 +49,18 @@ function isRobot(x: any): x is Robot {
   )
 }
 
-for(const r of mix)
-  if(isRobot(r))
-    console.log(`${count++}: [isRobot]`, r.name, r.action())
+mix.forEach((item, index) => {
+  if (isRobot(item))
+    console.log(`${index}: [isRobot]`, item.name, item.action())
+})
 ```
 
 ```console
-[LOG]: "1: [instanceof]",  "R2D2",  "beeps" 
-[LOG]: "2: [isRobot]",  "Alice",  "talks" 
-[LOG]: "3: [isRobot]",  "Bob",  "monologues" 
+[LOG]: "6: [instanceof]",  "R2D2",  "beeps" 
+[LOG]: "0: [isRobot]",  "Alice",  "talks" 
+[LOG]: "2: [isRobot]",  "Bob",  "monologues" 
 [LOG]: "4: [isRobot]",  "C3PO",  "informs" 
-[LOG]: "5: [isRobot]",  "R2D2",  "beeps" 
+[LOG]: "6: [isRobot]",  "R2D2",  "beeps" 
 ```
 
 You cannot use `instanceof` with type aliases.
@@ -75,7 +71,7 @@ Although the tag can be any literal type (including numbers, booleans, or even e
 The TypeScript compiler recognizes string literals more directly when narrowing union types with `switch` or `if`.
 
 ```ts
-// RobotFinderTagged.ts
+// TaggedRobotFinder.ts
 
 type Person = {
   kind: "person"
@@ -129,12 +125,10 @@ function isTaggedRobot(x: any): x is Robot {
   return x?.kind === "robot"
 }
 
-
 // Finds only Robot objects using "trusted discriminant":
 for (const r of mix)
   if (isTaggedRobot(r))
     console.log(`${count++}: [Robot (trusted)] ${r.name} ${r.action()}`)
-
 
 function isTaggedPerson(x: any): x is Person {
   return x?.kind === "person"
@@ -149,7 +143,6 @@ for (const p of mix)
       console.log(`${line}: [Person (trusted)]\n${err}:\n${JSON.stringify(p)}`)
     }
   }
-
 
 //  Thorough type guard for person:
 function isPerson(x: any): x is Person {
