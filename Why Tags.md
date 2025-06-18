@@ -283,11 +283,8 @@ class Robot {
   constructor(public name: string) {}
 }
 
-const a = new Robot("R2D2")
-const b = { name: "R2D2" }  // Structurally identical
-
-console.log(constructedBy(a, Robot)) // true
-console.log(constructedBy(b, Robot)) // false
+console.log(constructedBy(new Robot("R2D2"), Robot)) // true
+console.log(constructedBy({ name: "R2D2" }, Robot)) // false
 ```
 
 However, this would likely impose impractical constraints for most systems.
