@@ -98,7 +98,7 @@ Although the tag can be any literal type (including numbers, booleans, or even e
 The TypeScript compiler recognizes string literals more directly when narrowing union types with `switch` or `if`.
 
 In the following, the type tag is `kind` (it can have any name).
-Notice that the type of `kind` is the string literal `"person"` or `"robot"`:
+Notice that the type of `kind` is the string literal `"robot"` or `"person"`:
 
 ```ts
 // tagged-robot-finder.ts
