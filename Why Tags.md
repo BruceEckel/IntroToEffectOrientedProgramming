@@ -1,4 +1,13 @@
+# Type Tags
 
+Like JavaScript, TypeScript uses _structural typing_, which can be positively described as "flexible," "dynamic," or "permissive."
+Any object that conforms to a desired shape is acceptable, which produces a broad interpretation of what "type" means.
+For small and simple projects like web pages, this approach is often workable.
+As projects get larger and more complex, the "anything goes" approach eventually becomes intractable.
+This is one of the dominant reasons for the acceptance of TypeScript, as it improves type checking.
+Because TypeScript is not a dramatic departure from JavaScript it is more readily adopted than a more radical approach such as Elm (which, like TypeScript, produces JavaScript).
+
+The following example demonstrates some of the improvements provided by TypeScript:
 
 ```ts
 // robot-finder.ts
@@ -26,7 +35,7 @@ const p1: Person = { name: "Bob", action: () => "hi Bob"}
 // const p3: Person = { action: () => "hi Bob"} // Error: name missing
 // const p4: Person = {} // Error: name, action missing
 // const p5: Person = { name: "Bob", action: () => 11 } // Type error
-// Don't use 'as':
+// Don't use 'as' casting:
 const p6: Person = { name: "Bob"} as Person
 const p7: Person = { action: () => "hi Bob"} as Person
 const p8: Person = {} as Person
@@ -34,24 +43,24 @@ const p8: Person = {} as Person
 // const p9: Person = { name: "Bob", action: () => 11 } as Person
 
 const people: Array<Person> = [
-  { name: "Alice", action: () => "talks" },
-  { name: "Bob", action: () => "monologues" },
+  { name: "Person Alice", action: () => "talks" },
+  { name: "Person Bob", action: () => "monologues" },
   // { name: "?", action: 99 },  // Type error
   // { name: 11, action: () => 42 },  // Type errors
-  // { name: "K2SO", action: (x: string) => `${x}` }, // Type error
-  { name: "C3PO", action: () => "informs" },
-  { name: "K2SO", action: () => "pilots" } as Robot,
-  new RobotClass("R2D2", "beeps")
+  // { name: "Alf", action: (x: string) => `${x}` }, // Type error
+  { name: "Robot C3PO", action: () => "informs" },
+  { name: "Robot K2SO", action: () => "pilots" } as Robot,
+  new RobotClass("Robot R2D2", "beeps")
 ]
 
 const robots: Array<Robot> = [
-  { name: "C3PO", action: () => "informs" },
-  new RobotClass("R2D2", "beeps"),
+  { name: "Robot C3PO", action: () => "informs" },
+  new RobotClass("Robot R2D2", "beeps"),
   // { name: 11, action: () => 42 }, // Type error
   // { name: "?", action: 99 }, // Type error
   // { name: "K2SO", action: (s: string) => s }, // Type error
-  { name: "Alice", action: () => "talks" } as Person,
-  { name: "Bob", action: () => "monologues" },
+  { name: "Person Alice", action: () => "talks" },
+  { name: "Person Bob", action: () => "monologues" } as Person,
 ]
 
 // Only a constructed class object is findable by instanceof:
@@ -93,7 +102,7 @@ If you are writing simple web pages this may seem liberating,
 although even with the smallest systems there is a cognitive load to knowing all the special cases in the language.
 When systems get larger and more complex, structural typing becomes a heavy burden and we need to impose a stricter type system.
 
-In TypeScript, a type tag (also known as a discriminant) is usually a string literal because this provides the strongest type narrowing capabilities. 
+In TypeScript, a _type tag_ (also known as a _discriminant_) is usually a string literal because this provides the strongest type narrowing capabilities. 
 Although the tag can be any literal type (including numbers, booleans, or even enums), discriminated unions work best with string literal tags.
 The TypeScript compiler recognizes string literals more directly when narrowing union types with `switch` or `if`.
 
