@@ -95,7 +95,7 @@ robots.forEach((item, index) => {
 ```
 
 You cannot use `instanceof` with type aliases.
-Only classes have runtime constructors so `r instanceof Robot` won't compile.
+Only classes have runtime constructors so `r instanceof Robot` returns `false` unless `r` has been created by a constructor.
 
 Structural typing makes programming "easier" in the small; basically it allows you to be sloppy when you are writing simple programs or doing experimental coding.
 If you are writing simple web pages this may seem liberating, 
