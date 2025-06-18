@@ -87,11 +87,11 @@ robots.forEach((item, index) => {
 ```
 
 ```console
-[LOG]: "1: [instanceof]",  "R2D2",  "beeps" 
-[LOG]: "0: [isRobot]",  "C3PO",  "informs" 
-[LOG]: "1: [isRobot]",  "R2D2",  "beeps" 
-[LOG]: "2: [isRobot]",  "Alice",  "talks" 
-[LOG]: "3: [isRobot]",  "Bob",  "monologues" 
+[LOG]: "1: [instanceof]",  "Robot R2D2",  "beeps" 
+[LOG]: "0: [isRobot]",  "Robot C3PO",  "informs" 
+[LOG]: "1: [isRobot]",  "Robot R2D2",  "beeps" 
+[LOG]: "2: [isRobot]",  "Person Alice",  "talks" 
+[LOG]: "3: [isRobot]",  "Person Bob",  "monologues" 
 ```
 
 You cannot use `instanceof` with type aliases.
