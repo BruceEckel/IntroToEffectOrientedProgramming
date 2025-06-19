@@ -3,11 +3,11 @@
 Like JavaScript, TypeScript uses _structural typing_, which can be positively described as "flexible," "dynamic," or "permissive."
 Any object that conforms to a desired shape is acceptable, which produces a broad interpretation of what "type" means.
 For small and simple projects like web pages, this approach is often workable.
-As projects get larger and more complex, the "anything goes" approach eventually becomes intractable.
+As projects get larger and more complex, the "anything goes" attitude towards typing eventually becomes intractable.
 This is one of the dominant reasons for the acceptance of TypeScript, as it improves type checking.
-Because TypeScript is not a dramatic departure from JavaScript it is more readily adopted than a more radical approach such as Elm (which, like TypeScript, produces JavaScript).
+Because TypeScript is not a dramatic departure from JavaScript, it is more readily adopted than a more radical approach such as Elm (which, like TypeScript, produces JavaScript).
 
-The following example demonstrates some of the improvements provided by TypeScript:
+The following example demonstrates some of the improvements provided by TypeScript, as well as limitations:
 
 ```ts
 // robot-finder.ts
