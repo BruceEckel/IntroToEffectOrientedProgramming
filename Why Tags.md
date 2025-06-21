@@ -280,6 +280,13 @@ robots
 [LOG]: "ExactRobot:",  "C3PO",  "informs" 
 ```
 
+The sole job of the `kind` type tag is to uniquely identify the type of the object, no matter how that object is created.
+This uniqueness, however, requires programmer discipline across the entire project.
+As we see in `type Spoof`, it's possible to accidentally produce a type that conforms to a tagged type,
+although the particular combination of `kind` and `robot` does seem unlikely.
+
+In `RobotClass` you can see that the
+
 While tagging is a significant improvement atop structural typing, there are still holes in the system:
 - Casts using `as` must be disallowed (as much as is practical).
 - A type with a different name but conformant structure (`Spoof`) can still pass through type checks; tagging doesn't guarantee uniqueness as a nominative system does.
