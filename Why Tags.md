@@ -86,6 +86,8 @@ robots.forEach((item, index) => {
 })
 ```
 
+**Output:**
+
 ```console
 [LOG]: "1: [instanceof]",  "Robot R2D2",  "beeps" 
 [LOG]: "0: [isRobot]",  "Robot C3PO",  "informs" 
@@ -170,28 +172,50 @@ function makeSpoof(name: string, act: string): Spoof {
   }
 }
 
-const robots: Array<Robot> = [
-  new RobotClass("R2D2", "beeps"),
-  { kind: "robot", name: "C3PO", action: () => "informs" },
-  makeSpoof("K2SO", "security"), // Conformant shape
+// Extend a type with a second type tag:
+type RobotWithBigness = Robot & {
+  bigness: "very"
+}
+
+class BigRobot implements RobotWithBigness {
+  kind: "robot" = "robot"
+  bigness: "very" = "very"
+  constructor(public name: string, private emits: string) {}
+  action = (): string => this.emits
+}
+
+const badRobots: Array<Robot> = [
   // All produce type errors:
   // { kind: "robot", action: () => "informs" }
   // { kind: "robot", name: "K2SO", action: (x: string) => `${x}` },
   // { kind: "robot", name: 11, action: () => 42 },
   // { kind: "person", name: "Alice", action: () => "talks" },
   // { name: "Morty", action: () => "aw geez" },
-  // Once again, casts produce bad Robots:
+  // Casts succeed, bad Robots:
   {} as Robot,
   { kind: "robot", name: "Demolition" } as Robot,
   { kind: "robot", action: () => "cleans" } as Robot,
   // 
 ]
 
+function* robotGenerator(): Generator<Robot, void, unknown> {
+  yield new RobotClass("R2D2", "beeps")
+  yield { kind: "robot", name: "C3PO", action: () => "informs" }
+  yield makeSpoof("K2SO", "security")
+  // No upcasting allowed for non-constructed objects:
+  // yield { kind:"robot", name: "BB8", action: () => "rolls", bigness:"very" }
+  // Upcasting:
+  yield new BigRobot("BB8", "rolls")
+}
+
+const robots = Array.from(robotGenerator())
 
 // Only a constructed class object is findable by instanceof:
-for (const item of robots) 
-  if (item instanceof RobotClass)
-    log("instanceof:", item.name, item.action())
+robots.forEach(r => {
+  // Both checks required, no upcasting:
+  if (r instanceof BigRobot || r instanceof RobotClass)
+    log("instanceof:", r.name, r.action())
+})
 
 // Type guard based only on tag:
 function isTaggedRobot(x: any): x is Robot {
@@ -221,17 +245,13 @@ robots.forEach(detect)
 // Thorough type guard:
 function isExactRobot(value: unknown): value is Robot {
   if (value instanceof RobotClass) return true
-
   if (typeof value !== "object" || value === null) return false
-
   const obj = value as Record<string, unknown>
-
   if (
     obj.kind !== "robot" ||
     typeof obj.name !== "string" ||
     typeof obj.action !== "function"
   ) return false
-
   // No extra own properties:
   const ownKeys = Object.keys(obj)
   const allowedKeys = ["kind", "name", "action"]
@@ -246,14 +266,15 @@ robots
   .forEach(robot => log("ExactRobot:", robot.name, robot.action()))
 ```
 
+**Output:**
+
 ```console
 [LOG]: "instanceof:",  "R2D2",  "beeps" 
+[LOG]: "instanceof:",  "BB8",  "rolls" 
 [LOG]: "isTaggedRobot(name,R2D2,emits,beeps,kind,robot,action,() => this.emits): [true]" 
 [LOG]: "isTaggedRobot(kind,robot,name,C3PO,action,() => "informs"): [true]" 
 [LOG]: "isTaggedRobot(action,() => act + " spoof",name,K2SO,kind,robot,extra,foo): [true]" 
-[LOG]: "isTaggedRobot(): [false]" 
-[LOG]: "isTaggedRobot(kind,robot,name,Demolition): [true]" 
-[LOG]: "isTaggedRobot(kind,robot,action,() => "cleans"): [true]" 
+[LOG]: "isTaggedRobot(name,BB8,emits,rolls,kind,robot,bigness,very,action,() => this.emits): [true]" 
 [LOG]: RobotClass: {
   "name": "R2D2",
   "emits": "beeps",
@@ -268,16 +289,14 @@ robots
   "kind": "robot",
   "extra": "foo"
 },  "detected Robot K2SO" 
-[LOG]: {},  "did not detect Person or Robot" 
-[LOG]: {
+[LOG]: BigRobot: {
+  "name": "BB8",
+  "emits": "rolls",
   "kind": "robot",
-  "name": "Demolition"
-},  "detected Robot Demolition" 
-[LOG]: {
-  "kind": "robot"
-},  "detected Robot undefined" 
+  "bigness": "very"
+},  "detected Robot BB8" 
 [LOG]: "ExactRobot:",  "R2D2",  "beeps" 
-[LOG]: "ExactRobot:",  "C3PO",  "informs" 
+[LOG]: "ExactRobot:",  "C3PO",  "informs"
 ```
 
 The sole job of the `kind` type tag is to uniquely identify the type of the object, no matter how that object is created.
@@ -314,3 +333,4 @@ console.log(constructedBy({ name: "R2D2" }, Robot)) // false
 `constructedBy` checks an object's prototype explicitly, providing a reliable runtime check.
 
 This strategy would likely impose impractical constraints for most systems.
+Another approach, if you think there is a type tag collision, is to change your type tags or add a second tag.
