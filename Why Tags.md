@@ -113,7 +113,7 @@ However, `Robot` objects are allowed because they have the same shape, so declar
 Similarly, `robots` is not really an `Array<Robot>` because it can also hold `Person` objects.
 
 It's possible to create a runtime check to verify the shape of an object, as seen in `isRobot`.
-This first requires a check to ensure that `x` is an `object`, because it could also be a primitive type.
+We first check to ensure that `x` is an `object`, because it could also be a primitive type.
 Because `null` also qualifies as an `object`, we must explicitly check for `null`.
 After that we can check for the type of the `name` and `action` fields, and verify that `action` takes no arguments.
 However, after all this work we haven't achieved anything more that TypeScript's type checker, and a `Person` still qualifies as a `Robot`.
