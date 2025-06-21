@@ -133,6 +133,7 @@ Notice that the type of `kind` is the string literal `"robot"` or `"person"`:
 
 ```ts
 // tagged-robot-finder.ts
+const log = console.log.bind(console)
 
 type Robot = {
   kind: "robot"
@@ -143,9 +144,7 @@ type Robot = {
 class RobotClass implements Robot {
   kind: "robot" = "robot"
   constructor(public name: string, private emits: string) {}
-  action(): string {
-    return this.emits
-  }
+  action = (): string => this.emits
 }
 
 type Person = {
@@ -192,7 +191,7 @@ const robots: Array<Robot> = [
 // Only a constructed class object is findable by instanceof:
 for (const item of robots) 
   if (item instanceof RobotClass)
-    console.log("instanceof:", item.name, item.action())
+    log("instanceof:", item.name, item.action())
 
 // Type guard based only on tag:
 function isTaggedRobot(x: any): x is Robot {
@@ -201,24 +200,23 @@ function isTaggedRobot(x: any): x is Robot {
 
 // Find Robot objects using "trusted discriminant":
 for (const item of robots) 
-  console.log(`isTaggedRobot(${Object.entries(item)}): ${isTaggedRobot(item)}`)
+  log(`isTaggedRobot(${Object.entries(item)}): [${isTaggedRobot(item)}]`)
 
 // Pattern match on discriminant:
 function detect(x: Person | Robot) {
   switch (x.kind) {
     case "person":
-      console.log(x, `detected Person ${x.name}`)
+      log(x, `detected Person ${x.name}`)
       break
     case "robot":
-      console.log(x, `detected Robot ${x.name}`)
+      log(x, `detected Robot ${x.name}`)
       break
     default:
-      console.log(x, "did not detect Person or Robot")
-
+      log(x, "did not detect Person or Robot")
   }
 }
 
-robots.filter(detect)
+robots.forEach(detect)
 
 // Thorough type guard:
 function isExactRobot(value: unknown): value is Robot {
@@ -245,17 +243,17 @@ function isExactRobot(value: unknown): value is Robot {
 
 robots
   .filter(isExactRobot)
-  .forEach(robot => console.log("ExactRobot:", robot.name, robot.action()))
+  .forEach(robot => log("ExactRobot:", robot.name, robot.action()))
 ```
 
 ```console
 [LOG]: "instanceof:",  "R2D2",  "beeps" 
-[LOG]: "isTaggedRobot(name,R2D2,emits,beeps,kind,robot): true" 
-[LOG]: "isTaggedRobot(kind,robot,name,C3PO,action,() => "informs"): true" 
-[LOG]: "isTaggedRobot(action,() => act + " spoof",name,K2SO,kind,robot,extra,foo): true" 
-[LOG]: "isTaggedRobot(): false" 
-[LOG]: "isTaggedRobot(kind,robot,name,Demolition): true" 
-[LOG]: "isTaggedRobot(kind,robot,action,() => "cleans"): true" 
+[LOG]: "isTaggedRobot(name,R2D2,emits,beeps,kind,robot,action,() => this.emits): [true]" 
+[LOG]: "isTaggedRobot(kind,robot,name,C3PO,action,() => "informs"): [true]" 
+[LOG]: "isTaggedRobot(action,() => act + " spoof",name,K2SO,kind,robot,extra,foo): [true]" 
+[LOG]: "isTaggedRobot(): [false]" 
+[LOG]: "isTaggedRobot(kind,robot,name,Demolition): [true]" 
+[LOG]: "isTaggedRobot(kind,robot,action,() => "cleans"): [true]" 
 [LOG]: RobotClass: {
   "name": "R2D2",
   "emits": "beeps",
@@ -283,7 +281,7 @@ robots
 ```
 
 While tagging is a significant improvement atop structural typing, there are still holes in the system:
-- Casts using `as` must be disallowed
+- Casts using `as` must be disallowed (as much as is practical).
 - A type with a different name but conformant structure (`Spoof`) can still pass through type checks; tagging doesn't guarantee uniqueness as a nominative system does.
 - (more)
 
