@@ -174,7 +174,7 @@ function makeSpoof(name: string, act: string): Spoof {
 const robots: Array<Robot> = [
   new RobotClass("R2D2", "beeps"),
   { kind: "robot", name: "C3PO", action: () => "informs" },
-  makeSpoof("K2SO", "security"), // Identical shape
+  makeSpoof("K2SO", "security"), // Conformant shape
   // All produce type errors:
   // { kind: "robot", action: () => "informs" }
   // { kind: "robot", name: "K2SO", action: (x: string) => `${x}` },
@@ -190,110 +190,96 @@ const robots: Array<Robot> = [
 
 
 // Only a constructed class object is findable by instanceof:
-robots.forEach((item, index) => {
+for (const item of robots) 
   if (item instanceof RobotClass)
-    console.log(`${index}: [instanceof]`, item.name, item.action())
-})
+    console.log("instanceof:", item.name, item.action())
 
-// Robot type guard:
+// Type guard based only on tag:
 function isTaggedRobot(x: any): x is Robot {
   return x?.kind === "robot"
 }
 
-// Finds Robot objects using "trusted discriminant":
-robots.forEach((item, index) => {
-  if (isTaggedRobot(item))
-    try {
-      console.log(`${index}: [Robot (tagged)] `, item.name, item.action())
-    } catch(err) {
-      console.log(`${index}: [Robot (tagged)]\n${err}:\n${JSON.stringify(item)}`)
-    }
-})
-
-// Thorough type guard:
-function isExactRobot(value: unknown): value is Robot {
-  if (
-    typeof value !== "object" ||
-    value === null
-  ) return false
-
-  const expectedKeys = ["kind", "name", "action"]
-  const actualKeys = Object.keys(value as object)
-
-  if (
-    actualKeys.length !== expectedKeys.length ||
-    !expectedKeys.every(key => actualKeys.includes(key))
-  ) return false
-
-  const obj = value as Record<string, unknown>
-
-  return (
-    obj.kind === "robot" &&
-    typeof obj.name === "string" &&
-    typeof obj.action === "function"
-  )
-}
-
-robots.forEach((item, index) => {
-  if (isExactRobot(item))
-    console.log(`${index}: [Robot (thorough)]`, item.name, item.action())
-})
+// Find Robot objects using "trusted discriminant":
+for (const item of robots) 
+  console.log(`isTaggedRobot(${Object.entries(item)}): ${isTaggedRobot(item)}`)
 
 // Pattern match on discriminant:
 function detect(x: Person | Robot) {
   switch (x.kind) {
     case "person":
-      console.log(`Detected Person ${x.name}`)
+      console.log(x, `detected Person ${x.name}`)
+      break
     case "robot":
-      console.log(`Detected Robot ${x.name}`)
+      console.log(x, `detected Robot ${x.name}`)
+      break
+    default:
+      console.log(x, "did not detect Person or Robot")
+
   }
 }
 
-for (const robot of robots) {
-  console.log("testing", robot)
-  detect(robot)
+robots.filter(detect)
+
+// Thorough type guard:
+function isExactRobot(value: unknown): value is Robot {
+  if (value instanceof RobotClass) return true
+
+  if (typeof value !== "object" || value === null) return false
+
+  const obj = value as Record<string, unknown>
+
+  if (
+    obj.kind !== "robot" ||
+    typeof obj.name !== "string" ||
+    typeof obj.action !== "function"
+  ) return false
+
+  // No extra own properties:
+  const ownKeys = Object.keys(obj)
+  const allowedKeys = ["kind", "name", "action"]
+  return (
+    ownKeys.length === allowedKeys.length &&
+    allowedKeys.every(key => ownKeys.includes(key))
+  )
 }
+
+robots
+  .filter(isExactRobot)
+  .forEach(robot => console.log("ExactRobot:", robot.name, robot.action()))
 ```
 
 ```console
-[LOG]: "0: [instanceof]",  "R2D2",  "beeps" 
-[LOG]: "0: [Robot (tagged)] ",  "R2D2",  "beeps" 
-[LOG]: "1: [Robot (tagged)] ",  "C3PO",  "informs" 
-[LOG]: "2: [Robot (tagged)] ",  "K2SO",  "security spoof" 
-[LOG]: "4: [Robot (tagged)]
-TypeError: item.action is not a function:
-{"kind":"robot","name":"Demolition"}" 
-[LOG]: "5: [Robot (tagged)] ",  undefined,  "cleans" 
-[LOG]: "0: [Robot (thorough)]",  "R2D2",  "beeps" 
-[LOG]: "1: [Robot (thorough)]",  "C3PO",  "informs" 
-[LOG]: "2: [Robot (thorough)]",  "K2SO",  "security spoof" 
-[LOG]: "testing",  RobotClass: {
+[LOG]: "instanceof:",  "R2D2",  "beeps" 
+[LOG]: "isTaggedRobot(name,R2D2,emits,beeps,kind,robot): true" 
+[LOG]: "isTaggedRobot(kind,robot,name,C3PO,action,() => "informs"): true" 
+[LOG]: "isTaggedRobot(action,() => act + " spoof",name,K2SO,kind,robot,extra,foo): true" 
+[LOG]: "isTaggedRobot(): false" 
+[LOG]: "isTaggedRobot(kind,robot,name,Demolition): true" 
+[LOG]: "isTaggedRobot(kind,robot,action,() => "cleans"): true" 
+[LOG]: RobotClass: {
   "name": "R2D2",
   "emits": "beeps",
   "kind": "robot"
-} 
-[LOG]: "Detected Robot R2D2" 
-[LOG]: "testing",  {
+},  "detected Robot R2D2" 
+[LOG]: {
   "kind": "robot",
   "name": "C3PO"
-} 
-[LOG]: "Detected Robot C3PO" 
-[LOG]: "testing",  {
+},  "detected Robot C3PO" 
+[LOG]: {
   "name": "K2SO",
   "kind": "robot",
   "extra": "foo"
-} 
-[LOG]: "Detected Robot K2SO" 
-[LOG]: "testing",  {} 
-[LOG]: "testing",  {
+},  "detected Robot K2SO" 
+[LOG]: {},  "did not detect Person or Robot" 
+[LOG]: {
   "kind": "robot",
   "name": "Demolition"
-} 
-[LOG]: "Detected Robot Demolition" 
-[LOG]: "testing",  {
+},  "detected Robot Demolition" 
+[LOG]: {
   "kind": "robot"
-} 
-[LOG]: "Detected Robot undefined" 
+},  "detected Robot undefined" 
+[LOG]: "ExactRobot:",  "R2D2",  "beeps" 
+[LOG]: "ExactRobot:",  "C3PO",  "informs" 
 ```
 
 While tagging is a significant improvement atop structural typing, there are still holes in the system:
@@ -301,8 +287,8 @@ While tagging is a significant improvement atop structural typing, there are sti
 - A type with a different name but conformant structure (`Spoof`) can still pass through type checks; tagging doesn't guarantee uniqueness as a nominative system does.
 - (more)
 
-One strategy for creating a tighter type system would be to require that all objects be created via a class constructor,
-in which case `instanceof` would be a reliable way to determine the type.
+One strategy for creating a tighter type system is to require that all objects be created via a class constructor,
+in which case `instanceof` is a reliable way to determine the type.
 It's possible to validate this at runtime (but not during type checking):
 
 ```ts
