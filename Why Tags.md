@@ -103,7 +103,8 @@ Only classes have runtime constructors so `r instanceof Robot` returns `false` u
 
 `Person` has the same shape as `Robot` so the two appear identical to the structural type system.
 Definitions `p1` through `p9` show the many different ways you can attempt to define a `Person`, 
-and the ways that the type system will prevent you from creating incorrect `Person` objects.
+and how the type system prevents you from creating incorrect `Person` objects.
+
 One large hole in the type system is the ability to cast using `as`.
 With `as` you can basically say that any object is any other object; only in a few cases will you get type errors when using `as`.
 Casting with `as` should be disallowed in your code, and if you encounter bugs in other code, search for `as`.
