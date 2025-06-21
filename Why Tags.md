@@ -180,7 +180,7 @@ const robots: Array<Robot> = [
   // { kind: "robot", name: 11, action: () => 42 },
   // { kind: "person", name: "Alice", action: () => "talks" },
   // { name: "Morty", action: () => "aw geez" },
-  // Casts produce bad Robots:
+  // Once again, casts produce bad Robots:
   {} as Robot,
   { kind: "robot", name: "Demolition" } as Robot,
   { kind: "robot", action: () => "cleans" } as Robot,
@@ -210,20 +210,31 @@ robots.forEach((item, index) => {
 })
 
 // Thorough type guard:
-function isRobot(x: any): x is Robot {
+function isExactRobot(value: unknown): value is Robot {
+  if (
+    typeof value !== "object" ||
+    value === null
+  ) return false
+
+  const expectedKeys = ["kind", "name", "action"]
+  const actualKeys = Object.keys(value as object)
+
+  if (
+    actualKeys.length !== expectedKeys.length ||
+    !expectedKeys.every(key => actualKeys.includes(key))
+  ) return false
+
+  const obj = value as Record<string, unknown>
+
   return (
-    typeof x === "object" &&
-    x !== null &&
-    x.kind === "robot" &&
-    typeof x.name === "string" &&
-    typeof x.action === "function" &&
-    typeof x.action() === "string"  &&
-    x.action.length === 0
+    obj.kind === "robot" &&
+    typeof obj.name === "string" &&
+    typeof obj.action === "function"
   )
 }
 
 robots.forEach((item, index) => {
-  if (isRobot(item))
+  if (isExactRobot(item))
     console.log(`${index}: [Robot (thorough)]`, item.name, item.action())
 })
 
