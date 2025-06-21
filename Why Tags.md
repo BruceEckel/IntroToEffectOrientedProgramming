@@ -304,7 +304,17 @@ This uniqueness, however, requires programmer discipline across the entire proje
 As we see in `type Spoof`, it's possible to accidentally produce a type that conforms to a tagged type,
 although the particular combination of `kind` and `robot` does seem unlikely.
 
-In `RobotClass` you can see that the
+In `RobotClass` you can see that the `kind` tag must both repeat its type declaration _and_ assign an initial value, which can only be `"robot"`.
+
+`Person` has the same `shape` as `Robot` but it has a different `kind` tag.
+`Spoof` also has the same `shape` as `Robot`, even though the keys have a completely different order and there's an `extra` key that's not in `Robot`.
+`RobotWithBigness` shows how to extend a `type` using an `&`, and it adds a second type tag, `bigness`.
+In `BigRobot` we see both type tags initialized.
+
+The `badRobots` array shows how the type checker detects type errors, although this checking is effectively disabled by `as`.
+
+`robotGenerator` is a generator function, as distinguished by the asterisk in `function*`.
+It is used here primarily as an exercise in using generators; `robots` uses `Array.from` to immediately produce all the robots in `robotGenerator`.
 
 While tagging is a significant improvement atop structural typing, there are still holes in the system:
 - Casts using `as` must be disallowed (as much as is practical).
