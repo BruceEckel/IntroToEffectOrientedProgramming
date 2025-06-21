@@ -94,11 +94,32 @@ robots.forEach((item, index) => {
 [LOG]: "3: [isRobot]",  "Person Bob",  "monologues" 
 ```
 
+The `type` and `interface` keywords are only available in TypeScript.
+`type` is more recent, and more flexible; you virtually never need to use `interface`.
+
+Note that although `Robot` and `RobotClass` produce the same "structural shape," `RobotClass` is different because it is a formal class with a constructor.
 You cannot use `instanceof` with type aliases.
 Only classes have runtime constructors so `r instanceof Robot` returns `false` unless `r` has been created by a constructor.
 
-Structural typing makes programming "easier" in the small; basically it allows you to be sloppy when you are writing simple programs or doing experimental coding.
-If you are writing simple web pages this may seem liberating, 
+`Person` has the same shape as `Robot` so the two appear identical to the structural type system.
+Definitions `p1` through `p9` show the many different ways you can attempt to define a `Person`, 
+and the ways that the type system will prevent you from creating incorrect `Person` objects.
+One large hole in the type system is the ability to cast using `as`.
+With `as` you can basically say that any object is any other object; only in a few cases will you get type errors when using `as`.
+Casting with `as` should be disallowed in your code, and if you encounter bugs in other code, search for `as`.
+
+The `people` array is specified to hold `Person`, which automatically prevents many type errors.
+However, `Robot` objects are allowed because they have the same shape, so declaring `people` as `Array<Person>` is misleading.
+Similarly, `robots` is not really an `Array<Robot>` because it can also hold `Person` objects.
+
+It's possible to create a runtime check to verify the shape of an object, as seen in `isRobot`.
+This first requires a check to ensure that `x` is an `object`, because it could also be a primitive type.
+Because `null` also qualifies as an `object`, we must explicitly check for `null`.
+After that we can check for the type of the `name` and `action` fields, and verify that `action` takes no arguments.
+However, after all this work we haven't achieved anything more that TypeScript's type checker, and a `Person` still qualifies as a `Robot`.
+
+Structural typing makes programming "easier" in the small; it allows you to be sloppy when you are writing simple programs or doing experimental coding.
+If you are writing basic web pages this may seem liberating, 
 although even with the smallest systems there is a cognitive load to knowing all the special cases in the language.
 When systems get larger and more complex, structural typing becomes a heavy burden and we need to impose a stricter type system.
 
@@ -106,7 +127,7 @@ In TypeScript, a _type tag_ (also known as a _discriminant_) is usually a string
 Although the tag can be any literal type (including numbers, booleans, or even enums), discriminated unions work best with string literal tags.
 The TypeScript compiler recognizes string literals more directly when narrowing union types with `switch` or `if`.
 
-In the following, the type tag is `kind` (it can have any name).
+In the following, the type tag is named `kind`, but it can have any name.
 Notice that the type of `kind` is the string literal `"robot"` or `"person"`:
 
 ```ts
@@ -287,4 +308,6 @@ console.log(constructedBy(new Robot("R2D2"), Robot)) // true
 console.log(constructedBy({ name: "R2D2" }, Robot)) // false
 ```
 
-However, this would likely impose impractical constraints for most systems.
+`constructedBy` checks an object's prototype explicitly, providing a reliable runtime check.
+
+This strategy would likely impose impractical constraints for most systems.

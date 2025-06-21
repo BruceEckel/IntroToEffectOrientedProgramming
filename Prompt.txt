@@ -1,0 +1,5 @@
+Please add thorough descriptive prose after each example in the following chapter, targeted to an intermediate-level TypeScript programmer.
+
+Do not modify the examples in any way, only thoroughly describe them.
+
+Prefer short sentences. Use plain ascii text, no bold or italics, no bullet points. Use straight quotes and apostrophes.
