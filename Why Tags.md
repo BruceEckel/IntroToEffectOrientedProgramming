@@ -184,6 +184,9 @@ class BigRobot implements RobotWithBigness {
   action = (): string => this.emits
 }
 
+class LittleRobot extends RobotClass {
+}
+
 const badRobots: Array<Robot> = [
   // All produce type errors:
   // { kind: "robot", action: () => "informs" }
@@ -204,7 +207,7 @@ function* robotGenerator(): Generator<Robot, void, unknown> {
   yield makeSpoof("K2SO", "security")
   // No upcasting allowed for non-constructed objects:
   // yield { kind:"robot", name: "BB8", action: () => "rolls", bigness:"very" }
-  // Upcasting:
+  // Upcasting works with a constructed object:
   yield new BigRobot("BB8", "rolls")
 }
 
@@ -212,7 +215,7 @@ const robots = Array.from(robotGenerator())
 
 // Only a constructed class object is findable by instanceof:
 robots.forEach(r => {
-  // Both checks required, no upcasting:
+  // Both checks required, no upcasting for type inheritance:
   if (r instanceof BigRobot || r instanceof RobotClass)
     log("instanceof:", r.name, r.action())
 })
@@ -315,6 +318,8 @@ The `badRobots` array shows how the type checker detects type errors, although t
 
 `robotGenerator` is a generator function, as distinguished by the asterisk in `function*`.
 It is used here primarily as an exercise in using generators; `robots` uses `Array.from` to immediately produce all the robots in `robotGenerator`.
+
+Using `instanceof` requires an exact check
 
 While tagging is a significant improvement atop structural typing, there are still holes in the system:
 - Casts using `as` must be disallowed (as much as is practical).
