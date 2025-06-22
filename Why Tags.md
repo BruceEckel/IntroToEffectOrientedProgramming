@@ -177,6 +177,7 @@ type RobotWithBigness = Robot & {
   bigness: "very"
 }
 
+// Implement extended type:
 class BigRobot implements RobotWithBigness {
   kind: "robot" = "robot"
   bigness: "very" = "very"
@@ -184,8 +185,8 @@ class BigRobot implements RobotWithBigness {
   action = (): string => this.emits
 }
 
-class LittleRobot extends RobotClass {
-}
+// Class inheritance:
+class LittleRobot extends RobotClass {}
 
 const badRobots: Array<Robot> = [
   // All produce type errors:
@@ -209,13 +210,15 @@ function* robotGenerator(): Generator<Robot, void, unknown> {
   // yield { kind:"robot", name: "BB8", action: () => "rolls", bigness:"very" }
   // Upcasting works with a constructed object:
   yield new BigRobot("BB8", "rolls")
+  yield new LittleRobot("InsectBot", "flies")
 }
 
 const robots = Array.from(robotGenerator())
 
 // Only a constructed class object is findable by instanceof:
 robots.forEach(r => {
-  // Both checks required, no upcasting for type inheritance:
+  // Both checks required, no upcasting for type inheritance,
+  // but class inheritance is covered:
   if (r instanceof BigRobot || r instanceof RobotClass)
     log("instanceof:", r.name, r.action())
 })
@@ -225,9 +228,19 @@ function isTaggedRobot(x: any): x is Robot {
   return x?.kind === "robot"
 }
 
-// Find Robot objects using "trusted discriminant":
-for (const item of robots) 
-  log(`isTaggedRobot(${Object.entries(item)}): [${isTaggedRobot(item)}]`)
+function show(obj: Record<string, unknown>): string {
+  return Object
+    .entries(obj)
+    .sort(([k1], [k2]) => k2.localeCompare(k1))  // reverse sort keys
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(", ");
+}
+
+// Find Robot objects using trusted discriminant:
+robots.forEach(r => {
+  log(`TaggedRobot [${isTaggedRobot(r)}]: ${show(r)}`)
+})
+    
 
 // Pattern match on discriminant:
 function detect(x: Person | Robot) {
@@ -266,7 +279,7 @@ function isExactRobot(value: unknown): value is Robot {
 
 robots
   .filter(isExactRobot)
-  .forEach(robot => log("ExactRobot:", robot.name, robot.action()))
+  .forEach(r => log("ExactRobot:", r.name, r.action()))
 ```
 
 **Output:**
@@ -274,10 +287,12 @@ robots
 ```console
 [LOG]: "instanceof:",  "R2D2",  "beeps" 
 [LOG]: "instanceof:",  "BB8",  "rolls" 
-[LOG]: "isTaggedRobot(name,R2D2,emits,beeps,kind,robot,action,() => this.emits): [true]" 
-[LOG]: "isTaggedRobot(kind,robot,name,C3PO,action,() => "informs"): [true]" 
-[LOG]: "isTaggedRobot(action,() => act + " spoof",name,K2SO,kind,robot,extra,foo): [true]" 
-[LOG]: "isTaggedRobot(name,BB8,emits,rolls,kind,robot,bigness,very,action,() => this.emits): [true]" 
+[LOG]: "instanceof:",  "InsectBot",  "flies" 
+[LOG]: "TaggedRobot [true]: name: R2D2, kind: robot, emits: beeps, action: () => this.emits" 
+[LOG]: "TaggedRobot [true]: name: C3PO, kind: robot, action: () => "informs"" 
+[LOG]: "TaggedRobot [true]: name: K2SO, kind: robot, extra: foo, action: () => act + " spoof"" 
+[LOG]: "TaggedRobot [true]: name: BB8, kind: robot, emits: rolls, bigness: very, action: () => this.emits" 
+[LOG]: "TaggedRobot [true]: name: InsectBot, kind: robot, emits: flies, action: () => this.emits" 
 [LOG]: RobotClass: {
   "name": "R2D2",
   "emits": "beeps",
@@ -298,8 +313,14 @@ robots
   "kind": "robot",
   "bigness": "very"
 },  "detected Robot BB8" 
+[LOG]: LittleRobot: {
+  "name": "InsectBot",
+  "emits": "flies",
+  "kind": "robot"
+},  "detected Robot InsectBot" 
 [LOG]: "ExactRobot:",  "R2D2",  "beeps" 
-[LOG]: "ExactRobot:",  "C3PO",  "informs"
+[LOG]: "ExactRobot:",  "C3PO",  "informs" 
+[LOG]: "ExactRobot:",  "InsectBot",  "flies" 
 ```
 
 The sole job of the `kind` type tag is to uniquely identify the type of the object, no matter how that object is created.
