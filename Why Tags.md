@@ -121,11 +121,11 @@ Because `null` also qualifies as an `object`, we must explicitly check for `null
 After that we can check for the type of the `name` and `action` fields, and verify that `action` takes no arguments.
 Finally, notice that the return value is a boolean, but the return type of `isRobot` is `x is Robot`.
 This is a _type predicate_.
-It says, "When this function returns true, you can safely treat the variable x as having type Robot in the code that follows."
+It says, "When this function returns true, you can safely treat `x` as having type `Robot` in the code that follows."
 This way, `isRobot` provides _type narrowing_ and if this function call returns `true`, the TypeScript compiler will treat `x` as a `Robot` from that point on.
 The actual result of `isRobot` is just a boolean; the type narrowing is a side effect picked up by the TypeScript compiler.
 
-However, after all this work we haven't achieved anything more than TypeScript's type checker, and a `Person` still qualifies as a `Robot`.
+Unfortunately, after all the work writing `isRobot`, we haven't achieved anything more than TypeScript's type checker, and a `Person` still qualifies as a `Robot`.
 
 Structural typing makes programming "easier" in the small; it allows you to be sloppy when you are writing simple programs or doing experimental coding.
 If you are writing basic web pages this may seem liberating, 
