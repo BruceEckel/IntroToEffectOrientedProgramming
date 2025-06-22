@@ -223,17 +223,17 @@ robots.forEach(r => {
     log("instanceof:", r.name, r.action())
 })
 
-// Type guard based only on tag:
-function isTaggedRobot(x: any): x is Robot {
-  return x?.kind === "robot"
-}
-
 function show(obj: Record<string, unknown>): string {
   return Object
     .entries(obj)
     .sort(([k1], [k2]) => k2.localeCompare(k1))  // reverse sort keys
     .map(([key, value]) => `${key}: ${value}`)
     .join(", ");
+}
+
+// Type guard based only on tag:
+function isTaggedRobot(x: any): x is Robot {
+  return x?.kind === "robot"
 }
 
 // Find Robot objects using trusted discriminant:
