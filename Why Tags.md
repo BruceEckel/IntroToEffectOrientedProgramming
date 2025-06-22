@@ -345,13 +345,18 @@ The `badRobots` array shows how the type checker detects type errors, although t
 
 `robotGenerator` is a generator function, as distinguished by the asterisk in `function*`.
 It is used here primarily as an exercise in using generators; `robots` uses `Array.from` to immediately produce all the robots in `robotGenerator`.
+Notice that we cannot `yield` a `Robot` structure that has extra elements (look for `bigness:"very"`).
+`RobotWithBigness` is extended from `Robot` so that structure would represent an implementation of what appears to be a legitimate structural type.
+However, to "upcast" this to a `Robot` would require trimming off the `bigness:"very"` field.
+The only way to safely upcast an object is to create it with `new`, as seen with `BigRobot` and `LittleRobot`.
 
 Using `instanceof` requires an exact check when dealing with types.
 That is, just because `type RobotWithBigness` is extended from `type Robot`, 
 that does not establish an inheritance relationship between `RobotClass` and `BigRobot`.
 Thus, we must check for both in `if (r instanceof RobotClass || r instanceof BigRobot)`.
 
-The type guard `isTaggedRobot` can be quite simple
+The type guard `isTaggedRobot` can be quite simple, as it only needs to test if the `kind` field is `"robot"`.
+Because `x` is `any`, it can also be `null` so we need to use the `?` when checking `kind`.
 
 While tagging is a significant improvement atop structural typing, there are still holes in the system:
 - Casts using `as` must be disallowed (as much as is practical).
