@@ -119,7 +119,13 @@ It's possible to create a runtime check to verify the shape of an object, as see
 We first check to ensure that `x` is an `object`, because it could also be a primitive type.
 Because `null` also qualifies as an `object`, we must explicitly check for `null`.
 After that we can check for the type of the `name` and `action` fields, and verify that `action` takes no arguments.
-However, after all this work we haven't achieved anything more that TypeScript's type checker, and a `Person` still qualifies as a `Robot`.
+Finally, notice that the return value is a boolean, but the return type of `isRobot` is `x is Robot`.
+This is a _type predicate_.
+It says, "When this function returns true, you can safely treat the variable x as having type Robot in the code that follows."
+This way, `isRobot` provides _type narrowing_ and if this function call returns `true`, the TypeScript compiler will treat `x` as a `Robot` from that point on.
+The actual result of `isRobot` is just a boolean; the type narrowing is a side effect picked up by the TypeScript compiler.
+
+However, after all this work we haven't achieved anything more than TypeScript's type checker, and a `Person` still qualifies as a `Robot`.
 
 Structural typing makes programming "easier" in the small; it allows you to be sloppy when you are writing simple programs or doing experimental coding.
 If you are writing basic web pages this may seem liberating, 
@@ -219,7 +225,7 @@ const robots = Array.from(robotGenerator())
 robots.forEach(r => {
   // Both checks required, no upcasting for type inheritance,
   // but class inheritance is covered:
-  if (r instanceof BigRobot || r instanceof RobotClass)
+  if (r instanceof RobotClass || r instanceof BigRobot)
     log("instanceof:", r.name, r.action())
 })
 
@@ -340,7 +346,12 @@ The `badRobots` array shows how the type checker detects type errors, although t
 `robotGenerator` is a generator function, as distinguished by the asterisk in `function*`.
 It is used here primarily as an exercise in using generators; `robots` uses `Array.from` to immediately produce all the robots in `robotGenerator`.
 
-Using `instanceof` requires an exact check
+Using `instanceof` requires an exact check when dealing with types.
+That is, just because `type RobotWithBigness` is extended from `type Robot`, 
+that does not establish an inheritance relationship between `RobotClass` and `BigRobot`.
+Thus, we must check for both in `if (r instanceof RobotClass || r instanceof BigRobot)`.
+
+The type guard `isTaggedRobot` can be quite simple
 
 While tagging is a significant improvement atop structural typing, there are still holes in the system:
 - Casts using `as` must be disallowed (as much as is practical).
