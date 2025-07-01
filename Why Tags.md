@@ -351,19 +351,22 @@ However, to "upcast" this to a `Robot` would require trimming off the `bigness:"
 The only way to safely upcast an object is to create it with `new`, as seen with `BigRobot` and `LittleRobot`.
 
 Using `instanceof` requires an exact check when dealing with types.
-That is, just because `type RobotWithBigness` is extended from `type Robot`, 
-that does not establish an inheritance relationship between `RobotClass` and `BigRobot`.
+That is, extending `type RobotWithBigness` from `type Robot` does not establish an inheritance relationship between `RobotClass` and `BigRobot`.
 Thus, we must check for both in `if (r instanceof RobotClass || r instanceof BigRobot)`.
 
 The type guard `isTaggedRobot` can be quite simple, as it only needs to test if the `kind` field is `"robot"`.
 Because `x` is `any`, it can also be `null` so we need to use the `?` when checking `kind`.
 
+The type tag/discriminant allows for easy pattern matching on types, as we can just `switch` on `kind`.
+
 While tagging is a significant improvement atop structural typing, there are still holes in the system:
 - Casts using `as` must be disallowed (as much as is practical).
 - A type with a different name but conformant structure (`Spoof`) can still pass through type checks; tagging doesn't guarantee uniqueness as a nominative system does.
-- (more)
 
-One strategy for creating a tighter type system is to require that all objects be created via a class constructor,
+If you need completely deterministic type checking, you must create a type guard that validates *everything*, as seen in `isExactRobot`.
+This checks for constructed types using `instanceof`, verifies `kind`, `name` and `action`, and also ensures that there are no additional properties.
+
+Another strategy for creating a tighter type system is to require that all objects be created via a class constructor,
 in which case `instanceof` is a reliable way to determine the type.
 It's possible to validate this at runtime (but not during type checking):
 
