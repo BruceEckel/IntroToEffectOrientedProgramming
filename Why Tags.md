@@ -1,13 +1,13 @@
 # Type Tags
 
 Like JavaScript, TypeScript uses _structural typing_, which can be positively described as "flexible," "dynamic," or "permissive."
-Any object that conforms to a desired shape is acceptable, which produces a broad interpretation of what "type" means.
+Because any object that conforms to a desired shape is acceptable, this produces a broad interpretation of what "type" means.
 For small and simple projects like web pages, this approach is often workable.
 As projects get larger and more complex, the "anything goes" attitude towards typing eventually becomes intractable.
 This is one of the dominant reasons for the acceptance of TypeScript, as it improves type checking.
 Because TypeScript is not a dramatic departure from JavaScript, it is more readily adopted than a more radical approach such as Elm (which, like TypeScript, produces JavaScript).
 
-The following example demonstrates some of the improvements provided by TypeScript, as well as limitations:
+This example demonstrates some of the type improvements provided by TypeScript, as well as limitations:
 
 ```ts
 // robot-finder.ts
@@ -115,21 +115,21 @@ The `people` array is specified to hold `Person`, which automatically prevents m
 However, `Robot` objects are allowed because they have the same shape, so declaring `people` as `Array<Person>` is misleading.
 Similarly, `robots` is not really an `Array<Robot>` because it can also hold `Person` objects.
 
-It's possible to create a runtime check to verify the shape of an object, as seen in `isRobot`.
+It's possible to create a runtime check (a.k.a. _guard_) to verify the shape of an object, as seen in `isRobot`.
 We first check to ensure that `x` is an `object`, because it could also be a primitive type.
 Because `null` also qualifies as an `object`, we must explicitly check for `null`.
-After that we can check for the type of the `name` and `action` fields, and verify that `action` takes no arguments.
+After that we check for the type of the `name` and `action` fields, and verify that `action` takes no arguments.
 Finally, notice that the return value is a boolean, but the return type of `isRobot` is `x is Robot`.
 This is a _type predicate_.
 It says, "When this function returns true, you can safely treat `x` as having type `Robot` in the code that follows."
-This way, `isRobot` provides _type narrowing_ and if this function call returns `true`, the TypeScript compiler will treat `x` as a `Robot` from that point on.
-The actual result of `isRobot` is just a boolean; the type narrowing is a side effect picked up by the TypeScript compiler.
+This way, `isRobot` provides _type narrowing_ and if this function returns `true`, the TypeScript compiler will treat `x` as a `Robot` from that point on.
+The actual result of `isRobot` is just a Boolean; the type narrowing is a side effect picked up by the TypeScript compiler.
 
 Unfortunately, after all the work writing `isRobot`, we haven't achieved anything more than TypeScript's type checker, and a `Person` still qualifies as a `Robot`.
 
 Structural typing makes programming "easier" in the small; it allows you to be sloppy when you are writing simple programs or doing experimental coding.
-If you are writing basic web pages this may seem liberating, 
-although even with the smallest systems there is a cognitive load to knowing all the special cases in the language.
+If you are writing basic web pages, this may seem liberating.
+However, even with the smallest systems there is a cognitive load to knowing all the special cases in the language.
 When systems get larger and more complex, structural typing becomes a heavy burden and we need to impose a stricter type system.
 
 In TypeScript, a _type tag_ (also known as a _discriminant_) is usually a string literal because this provides the strongest type narrowing capabilities. 
@@ -137,7 +137,7 @@ Although the tag can be any literal type (including numbers, booleans, or even e
 The TypeScript compiler recognizes string literals more directly when narrowing union types with `switch` or `if`.
 
 In the following, the type tag is named `kind`, but it can have any name.
-Notice that the type of `kind` is the string literal `"robot"` or `"person"`:
+Here, the type of `kind` is the string literal `"robot"` or `"person"`:
 
 ```ts
 // tagged-robot-finder.ts
@@ -332,27 +332,28 @@ robots
 The sole job of the `kind` type tag is to uniquely identify the type of the object, no matter how that object is created.
 This uniqueness, however, requires programmer discipline across the entire project.
 As we see in `type Spoof`, it's possible to accidentally produce a type that conforms to a tagged type,
-although the particular combination of `kind` and `robot` does seem unlikely.
+although that particular combination of `kind` and `robot` seems unlikely.
 
 In `RobotClass` you can see that the `kind` tag must both repeat its type declaration _and_ assign an initial value, which can only be `"robot"`.
 
-`Person` has the same `shape` as `Robot` but it has a different `kind` tag.
-`Spoof` also has the same `shape` as `Robot`, even though the keys have a completely different order and there's an `extra` key that's not in `Robot`.
+`Person` has the same shape as `Robot` but it has a different `kind` tag.
+`Spoof` also has the same shape as `Robot`, even though the keys have a completely different order and there's an `extra` key that's not in `Robot`.
 `RobotWithBigness` shows how to extend a `type` using an `&`, and it adds a second type tag, `bigness`.
 In `BigRobot` we see both type tags initialized.
 
-The `badRobots` array shows how the type checker detects type errors, although this checking is effectively disabled by `as`.
+The `badRobots` array shows how the type checker detects type errors, although this checking is effectively disabled using `as`.
 
 `robotGenerator` is a generator function, as distinguished by the asterisk in `function*`.
-It is used here primarily as an exercise in using generators; `robots` uses `Array.from` to immediately produce all the robots in `robotGenerator`.
-Notice that we cannot `yield` a `Robot` structure that has extra elements (look for `bigness:"very"`).
-`RobotWithBigness` is extended from `Robot` so that structure would represent an implementation of what appears to be a legitimate structural type.
+It is used here primarily as an exercise in using generators; `const robots` uses `Array.from` to immediately produce all the robots in `robotGenerator`.
+
+We cannot `yield` a `Robot` structure that has extra elements (look for `bigness:"very"`).
+`RobotWithBigness` is extended from `Robot` so that structure represents an implementation of what appears to be a legitimate structural type.
 However, to "upcast" this to a `Robot` would require trimming off the `bigness:"very"` field.
 The only way to safely upcast an object is to create it with `new`, as seen with `BigRobot` and `LittleRobot`.
 
 Using `instanceof` requires an exact check when dealing with types.
 That is, extending `type RobotWithBigness` from `type Robot` does not establish an inheritance relationship between `RobotClass` and `BigRobot`.
-Thus, we must check for both in `if (r instanceof RobotClass || r instanceof BigRobot)`.
+Thus, we must check for both types in the expression `if (r instanceof RobotClass || r instanceof BigRobot)`.
 
 The type guard `isTaggedRobot` can be quite simple, as it only needs to test if the `kind` field is `"robot"`.
 Because `x` is `any`, it can also be `null` so we need to use the `?` when checking `kind`.
@@ -363,8 +364,8 @@ While tagging is a significant improvement atop structural typing, there are sti
 - Casts using `as` must be disallowed (as much as is practical).
 - A type with a different name but conformant structure (`Spoof`) can still pass through type checks; tagging doesn't guarantee uniqueness as a nominative system does.
 
-If you need completely deterministic type checking, you must create a type guard that validates *everything*, as seen in `isExactRobot`.
-This checks for constructed types using `instanceof`, verifies `kind`, `name` and `action`, and also ensures that there are no additional properties.
+If you need completely deterministic type checking, you must create a type guard that validates _everything_, as seen in `isExactRobot`.
+This checks for constructed types using `instanceof`, verifies `kind`, `name` and `action`, and also ensures there are no additional properties.
 
 Another strategy for creating a tighter type system is to require that all objects be created via a class constructor,
 in which case `instanceof` is a reliable way to determine the type.
