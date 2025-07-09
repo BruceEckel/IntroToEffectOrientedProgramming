@@ -642,7 +642,7 @@ In theory, branding makes type tags like `kind: "robot"` redundant because the b
 However, in practice, type tags and branding serve different roles and work best when used together:
 
 | Feature                | Type Tag (`kind`)                               | Branding (`unique symbol`)                                          |
-| ---------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
+|------------------------|-------------------------------------------------|---------------------------------------------------------------------|
 | **Purpose**            | Enables type narrowing via discriminated unions | Enforces nominal typing to distinguish structurally identical types |
 | **Checked at runtime** | Yes (e.g., `if (x.kind === "robot")`)           | No — erased at runtime                                              |
 | **Compiler behavior**  | Used in `switch`/`if` narrowing                 | Used to prevent unintended assignment or inference                  |
@@ -657,7 +657,13 @@ On the other hand, branding enforces true nominal distinctions, which `kind` alo
 You should use **both** branding and type tags, so that:
 
 * Branding provides **compile-time guarantees** and prevents mistaken assignments.
-* Type tags provide **runtime discriminants** and make control flow and debugging clearer.
+* Type tags provide **runtime discriminants** to make control flow and debugging clearer.
 
 Together, they offer strong guarantees and clear semantics both for the compiler and for the human reader.
+However, in many real-world scenarios you can choose the simpler solution between:
 
+- Different type tags (like `"user_id"` vs `"product_id"`) often solve the problem more simply than branding
+- Branding alone works well for primitive wrapper types
+- Type tags alone work perfectly for discriminated unions with different shapes
+
+The "use both" approach is mainly needed when you're constrained by existing APIs or need both runtime checks and compile-time nominal typing guarantees.
