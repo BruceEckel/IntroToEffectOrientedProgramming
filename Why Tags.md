@@ -563,3 +563,101 @@ getProduct(productId) // OK
 `ProductId` becomes a branded type distinct from plain numbers, preventing accidental misuse.
 
 
+## Using Branding to Solve the Robot/Human Problem
+
+Branding solves the problem of two distinct types, such as `Robot` and `Person`, 
+being mistakenly considered identical by the TypeScript compiler if they use the same type tags and have the same shape. 
+By introducing unique, compiler-recognized markers, branding differentiates otherwise identical types.
+
+Here's how branding distinguishes `Robot` from `Person`:
+
+```typescript
+const RobotBrand: unique symbol = Symbol.for("type/Robot")
+const PersonBrand: unique symbol = Symbol.for("type/Person")
+
+type Robot = {
+  kind: "robot"
+  name: string
+  action(): string
+  readonly [RobotBrand]: "Robot"
+}
+
+class RobotClass implements Robot {
+  kind: "robot" = "robot"
+  readonly [RobotBrand]: "Robot" = "Robot"
+  constructor(public name: string, private emits: string) {}
+  action = (): string => this.emits
+}
+
+type Person = {
+  kind: "person"
+  name: string
+  action(): string
+  readonly [PersonBrand]: "Person"
+}
+
+function createRobot(name: string, emits: string): Robot {
+  return new RobotClass(name, emits)
+}
+
+function createPerson(name: string): Person {
+  return {
+    kind: "person",
+    name,
+    action: () => "speaks",
+    [PersonBrand]: "Person"
+  }
+}
+
+const robot = createRobot("R2D2", "beeps")
+const person = createPerson("Alice")
+
+function interact(entity: Robot | Person) {
+  switch(entity.kind) {
+    case "robot":
+      console.log(`Robot named ${entity.name} ${entity.action()}`)
+      break
+    case "person":
+      console.log(`Person named ${entity.name} ${entity.action()}`)
+      break
+  }
+}
+
+interact(robot)
+interact(person)
+
+// TypeScript prevents structural confusion:
+// interact({ kind: "robot", name: "Spoof", action: () => "fake" }) // Error: Missing [RobotBrand]
+```
+
+* `RobotBrand` and `PersonBrand` are global symbols ensuring uniqueness.
+* Each type includes a brand marker, uniquely differentiating them even if structurally identical otherwise.
+* The `readonly` property ensures the branding cannot be changed or misused, thus preserving type safety.
+
+Branding thus creates a nominal typing system within TypeScript’s structural typing framework, enforcing stricter type checks and significantly enhancing robustness, especially in larger and more complex projects.
+
+### Are Type Tags Redundant with Branding?
+
+In theory, branding makes type tags like `kind: "robot"` redundant because the brand already distinguishes the type. 
+However, in practice, type tags and branding serve different roles and work best when used together:
+
+| Feature                | Type Tag (`kind`)                               | Branding (`unique symbol`)                                          |
+| ---------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
+| **Purpose**            | Enables type narrowing via discriminated unions | Enforces nominal typing to distinguish structurally identical types |
+| **Checked at runtime** | Yes (e.g., `if (x.kind === "robot")`)           | No — erased at runtime                                              |
+| **Compiler behavior**  | Used in `switch`/`if` narrowing                 | Used to prevent unintended assignment or inference                  |
+| **Developer clarity**  | Readable and obvious during debugging           | Hidden unless inspected with symbols                                |
+| **Erasure in JS**      | Remains (string literal)                        | Symbol key is retained but usually ignored                          |
+| **Tooling support**    | Supported by default in control-flow narrowing  | Invisible to tooling unless specifically handled                    |
+
+Branding is invisible at runtime and only aids the compiler. 
+This makes it unsuitable for runtime checks like pattern matching, where `kind` is still essential. 
+On the other hand, branding enforces true nominal distinctions, which `kind` alone cannot.
+
+You should use **both** branding and type tags, so that:
+
+* Branding provides **compile-time guarantees** and prevents mistaken assignments.
+* Type tags provide **runtime discriminants** and make control flow and debugging clearer.
+
+Together, they offer strong guarantees and clear semantics both for the compiler and for the human reader.
+
