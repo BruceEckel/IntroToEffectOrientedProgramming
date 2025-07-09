@@ -360,33 +360,12 @@ Because `x` is `any`, it can also be `null` so we need to use the `?` when check
 
 The type tag/discriminant allows for easy pattern matching on types, as we can just `switch` on `kind`.
 
-While tagging is a significant improvement atop structural typing, there are still holes in the system:
-- Casts using `as` must be disallowed (as much as is practical).
-- A type with a different name but conformant structure (`Spoof`) can still pass through type checks; tagging doesn't guarantee uniqueness as a nominative system does.
-
 If you need completely deterministic type checking, you must create a type guard that validates _everything_, as seen in `isExactRobot`.
 This checks for constructed types using `instanceof`, verifies `kind`, `name` and `action`, and also ensures there are no additional properties.
 
-Another strategy for creating a tighter type system is to require that all objects be created via a class constructor,
-in which case `instanceof` is a reliable way to determine the type.
-It's possible to validate this at runtime (but not during type checking):
+While basic tagging is a significant improvement atop structural typing, there are still holes in the system:
+- Casts using `as` must be disallowed (as much as is practical).
+- A type with a different name but conformant structure (`Spoof`) can still pass through type checks; tagging doesn't guarantee uniqueness as a nominative system does.
 
-```ts
-// constructed-by.ts
+The second point is significant and there's a solution.
 
-function constructedBy<T>(x: unknown, classConstructor: new (...args: any[]) => T): x is T {
-  return Object.getPrototypeOf(x) === classConstructor.prototype
-}
-
-class Robot {
-  constructor(public name: string) {}
-}
-
-console.log(constructedBy(new Robot("R2D2"), Robot)) // true
-console.log(constructedBy({ name: "R2D2" }, Robot)) // false
-```
-
-`constructedBy` checks an object's prototype explicitly, providing a reliable runtime check.
-
-This strategy would likely impose impractical constraints for most systems.
-Another approach, if you think there is a type tag collision, is to change your type tags or add a second tag.
