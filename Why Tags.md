@@ -496,7 +496,7 @@ const obj = {
 console.log(obj.dynamicKey) // "dynamic value"
 ```
 
-### TypeScript and `unique symbol`
+### `unique symbol`
 
 The `unique` keyword in TypeScript is used exclusively with `symbol` to define a `unique symbol` type. 
 It is not used elsewhere in the language.
