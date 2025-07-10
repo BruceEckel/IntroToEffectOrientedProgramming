@@ -385,8 +385,7 @@ This means it represents a fundamental, low-level value.
 However, unlike `number` or `string`, which represent common data, symbols are used specifically to create unique and unguessable identifiers.
 They are primarily used as object property keys and for advanced type-level patterns in TypeScript.
 
-Symbols are used to create unique identifiers.
-Symbols are always unique, even if they have the same description:
+Symbols create unique identifiers, even if they have the same description:
 
 ```typescript
 const sym1 = Symbol("identifier")
@@ -399,12 +398,12 @@ The description `"identifier"` helps with debugging but doesn't affect the symbo
 
 Although symbols are unique and opaque, they support a few well-defined operations:
 
-* Create a symbol: using `Symbol(description)` or `Symbol.for(key)`
-* Use as object keys: symbols can be used as property keys in objects
-* Compare: symbols can be compared with `===` for identity
-* Retrieve description: `sym.description` returns the debug label
-* Global key lookup: `Symbol.keyFor(sym)` returns the key if created via `Symbol.for`
-* Use with _computed property syntax_: symbols must be bracketed when used as keys (described later)
+* Create with `Symbol(description)` or `Symbol.for(key)`
+* Can be used as property keys in objects
+* Can compare for identity with `===`
+* `sym.description` returns the debug label
+* `Symbol.keyFor(sym)` returns the key if created via `Symbol.for`
+* _computed property syntax_: symbols must be bracketed when used as keys (described later)
 
 Symbols cannot be concatenated, serialized to JSON, or implicitly converted to strings,
 which helps preserve their uniqueness and privacy in object structures.
@@ -452,17 +451,20 @@ const sym = Symbol.for("app/symbol")
 console.log(Symbol.keyFor(sym)) // "app/symbol"
 
 const localSym = Symbol("app/symbol")
-console.log(Symbol.keyFor(localSym)) // Undefined (not globally registered)
+// Undefined (not globally registered):
+console.log(Symbol.keyFor(localSym)) 
 ```
 
-Using descriptive, namespaced keys helps avoid symbol collisions:
+Use descriptive, namespaced keys to help avoid symbol collisions:
 
 * Good: `"effect/Brand"`
 * Poor: `"Brand"` (too generic)
 
 The key (`"effect/Brand"`) is purely descriptive—it has no relationship to any filesystem path or URL.
 
-No built-in JavaScript or TypeScript mechanism exists to list or inspect the global registry. The registry is intentionally opaque and secure by design. If you need a list, manually track symbols within your application.
+No built-in JavaScript or TypeScript mechanism exists to list or inspect the global registry. 
+The registry is intentionally opaque and secure by design. 
+If you need a list, manually track symbols within your application.
 
 
 ### Computed Property Keys
@@ -496,7 +498,8 @@ console.log(obj.dynamicKey) // "dynamic value"
 
 ### TypeScript and `unique symbol`
 
-The `unique` keyword in TypeScript is used exclusively with `symbol` to define a `unique symbol` type. It is not used elsewhere in the language.
+The `unique` keyword in TypeScript is used exclusively with `symbol` to define a `unique symbol` type. 
+It is not used elsewhere in the language.
 
 This special type (`unique symbol`) allows the symbol to be treated as a **literal type**, enabling precise branding and enforcing nominal typing. For example:
 
