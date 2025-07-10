@@ -109,7 +109,7 @@ and how the type system prevents you from creating incorrect `Person` objects.
 
 One large hole in the type system is the ability to cast using `as`.
 With `as` you can basically say that any object is any other object; only in a few cases will you get type errors when using `as`.
-Casting with `as` should be disallowed in your code, and if you encounter bugs in other code, search for `as`.
+Casting with `as` should be avoided in your code, and if you encounter bugs in other code, search for `as`.
 
 The `people` array is specified to hold `Person`, which automatically prevents many type errors.
 However, `Robot` objects are allowed because they have the same shape, so declaring `people` as `Array<Person>` is misleading.
@@ -380,7 +380,7 @@ The _global symbol registry_ creates reusable symbols by key, enabling safe and 
 
 ### What is a Symbol?
 
-A _symbol_ is considered a primitive type in JavaScript, like `number`, `string`, or `boolean`.
+A _symbol_ is a primitive type in JavaScript, like `number`, `string`, or `boolean`.
 This means it represents a fundamental, low-level value.
 However, unlike `number` or `string`, which represent common data, symbols are used specifically to create unique and unguessable identifiers.
 They are primarily used as object property keys and for advanced type-level patterns in TypeScript.
@@ -395,14 +395,15 @@ console.log(sym1 === sym2) // false
 ```
 
 The description `"identifier"` helps with debugging but doesn't affect the symbol's uniqueness.
+Calling the `Symbol` constructor always creates a unique symbol, regardless of the `string` argument.
 
 Although symbols are unique and opaque, they support a few well-defined operations:
 
 * Create with `Symbol(description)` or `Symbol.for(key)`
 * Can be used as property keys in objects
-* Can compare for identity with `===`
-* `sym.description` returns the debug label
-* `Symbol.keyFor(sym)` returns the key if created via `Symbol.for`
+* Can be compared with `===` to determine identity
+* `sym.description` returns the description label (`"identifier"` in the above example)
+* `Symbol.keyFor(sym)` returns the key if created via `Symbol.for()`
 * _computed property syntax_: symbols must be bracketed when used as keys (described later)
 
 Symbols cannot be concatenated, serialized to JSON, or implicitly converted to strings,
@@ -569,7 +570,7 @@ getProduct(productId) // OK
 ## Using Branding to Solve the Robot/Human Problem
 
 Branding solves the problem of two distinct types, such as `Robot` and `Person`, 
-being mistakenly considered identical by the TypeScript compiler if they use the same type tags and have the same shape. 
+being incorrectly treated as identical by the TypeScript compiler if they use the same type tags and have the same shape. 
 By introducing unique, compiler-recognized markers, branding differentiates otherwise identical types.
 
 Here's how branding distinguishes `Robot` from `Person`:
