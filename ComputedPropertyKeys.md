@@ -11,9 +11,11 @@ There are two major ways computed keys appear in branding:
     readonly [BrandTypeId]: { ... }
     ```
     
-    This creates a single property whose key is the value of the symbol `BrandTypeId`. 
+    This creates a property.
+    `[BrandTypeId]` produces an identifier for the key.
+    The identifier is the value of the symbol `BrandTypeId`. 
     In this case, the key is not a string like "brand"--it's a symbol, which guarantees uniqueness and non-collision.
-    If you pass in a string, it will produce an identifier with that string: 
+    However, if you pass in a string, it will produce an identifier with that string: 
     
     ```ts
     readonly ["Dog"]: { ... } // Identifier becomes Dog 
@@ -25,7 +27,8 @@ There are two major ways computed keys appear in branding:
     readonly [id in ID]: ID
     ```
     
-    This is part of a _mapped type_, which iterates over a union type `ID`. For each member of the union, it creates a distinct property where the key is the value itself:
+    `[id in ID]` is a _mapped type_, which iterates over a union type `ID`.
+    For each member of the union, it creates a distinct property where the key is the value itself:
      
     ```ts
     type Keys = "a" | "b"
@@ -44,7 +47,7 @@ There are two major ways computed keys appear in branding:
     }
     ```
     
-In a generic like this:
+In a generic, such as:
 
 ```ts
 interface Brand<ID extends string | symbol> {
@@ -54,9 +57,10 @@ interface Brand<ID extends string | symbol> {
 }
 ```
 
-When you call it with a single type argument `ID`, such as `Brand<"typeID">`, 
-`readonly [id in ID]: ID` "iterates over" each of the types allowed by the generic (`string | symbol`) and produces a
-key-value pair for each match. There's only one match ing this case, so it produces:
+Call it with a single type argument `ID`, such as `Brand<"typeID">`. 
+In `readonly [id in ID]: ID`, 
+`[id in ID]` "iterates over" each of the types allowed by the generic (`string | symbol`) and produces a key-value pair for each match. 
+There's only one match in this case, so it produces:
 
 ```ts
 interface Brand<"typeID"> {
@@ -66,9 +70,10 @@ interface Brand<"typeID"> {
 }
 ```
 
-In branding, this is intended for use with a single string or symbol literal to generate a unique shape.
+In branding, this is intended for use with a single string or symbol literal to generate a unique type shape.
 
-Computed property keys are essential to branding in TypeScript because they allow the compiler to distinguish types using structural uniqueness—either by injecting symbol-based keys, or by generating objects with unique string keys tied to a specific brand identity.
+Computed property keys are essential to branding in TypeScript because they allow the compiler to distinguish types using structural uniqueness,
+either by injecting symbol-based keys, or by generating objects with unique string keys tied to a specific brand identity.
 
 The branding construct acts like a _type-level watermark_:
 
