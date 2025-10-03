@@ -1,9 +1,9 @@
 # Perfect Computing
 
 Suppose you could build the perfect computing platform.
-To achieve thiswe need to be able to produce perfect composition.
-That means I can tak eany component and stick it into your system and it will play well with the other components.
-In order to achieve that, a component needs to be perfectly opaque.
+To achieve this, we need to be able to produce perfect composition.
+That means I can take any component and stick it into your system and it will play well with the other components.
+To achieve that, a component needs to be perfectly opaque.
 Each component only exposes its interface, using the same universal description mechanism that all components use.
 
 Composability is one of the fundamental holy grails of computing.
