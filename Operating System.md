@@ -3,7 +3,7 @@
 
 Early programmers wrote directly to the hardware. 
 Each program had to understand how to manipulate the particular hardware it ran on, and this was true even on large, expensive machines.
-This generated large amounts of duplicated code and required rewrites in order to run the software on different machines.
+This generated large amounts of duplicated code and required rewrites to run the software on different machines.
 
 Operating systems provided a common interface to the underlying hardware.
 All that custom, duplicated code coalesced into a layer maintained separately from user programs.
@@ -17,43 +17,44 @@ In addition, these systems are brittle--making changes can require extensive re-
 
 What if we dramatically raise the abstraction of the operating system?
 Arguably, the standard library for your programming language does this to some degree.
-To display something on the console, you don't need to know the operating system call, but instead use a "print" function from your standard library.
-Even with a large standard library, however, we are still talking about relatively basic operations.
+You use a "print" function from your standard library to display something on the console--you don't need to know the operating system call.
+Even with a large standard library, however, these are still relatively basic operations.
 It's a better abstraction, but it doesn't liberate us from repetitive code and system fragility.
-On top of that, the problems of concurrency (including async and parallel execution) must be solved in a custom manner for each new program.
+On top of that, the problems of concurrency (both async and parallel execution) must be solved in a custom manner for each new program.
 
 We've come to accept these things as "what programming is."
 
-Now consider a much higher-level operating-system-like entity that eliminates these code-duplication and fragility problems.
+Consider a much higher-level operating-system-like entity that eliminates these code-duplication and fragility problems.
 It manages I/O, concurrency, and higher-level issues that allow you to design *what the program does* rather than *how it does it*.
-Modifying a program is such a system becomes far easier and faster.
+Modifying a program in such a system becomes far easier and faster.
+For now, let's call this an "operating environment."
 
-For example, suppose you are trying to connect with another system to fetch or deliver information.
+For example, suppose you must connect with another system to fetch or deliver information.
 The remote system turns out to be unreliable in various ways: it doesn't always respond right away, and sometimes not at all.
-You need to try various approaches to deal with this unreliability.
-Trying the different approaches typically requires significant amounts of consideration and coding, and you don't know ahead of time which approaches will work.
+You must try various approaches to deal with this unreliability.
+Each approach typically requires significant amounts of consideration and coding, and you don't know ahead of time which ones will work.
 
-Now imagine that each of these operations is encapsulated in such a way that the operations can be easily composed.
+Imagine each of these operations is encapsulated in such a way that those operations can be easily composed.
 Communicating with another system is an encapsulated operation.
 Fallbacks and retries and other approaches are also encapsulated operations.
 
-To compose, you simply stick them together, and the magical "operating system" takes care of details that would ordinarily take days, weeks, or months to set up and maintain.
+To compose, you stick them together, and the "operating environment" takes care of details that would ordinarily take days, weeks, or months to set up and maintain.
 If an experiment doesn't produce the desired result, it can be easily changed to try another approach.
-If there's an opportunity to use concurrency, the "operating system" does it automatically.
+If there's an opportunity to use concurrency, the "operating environment" does it automatically.
 This raises the level of abstraction far closer to "what" and further away from "how."
 
 ## The Price
 
-The benefits of such a system are obvious: programmers can spend far more of their time creating good programs, and far less time getting those programs to work.
-Fewer programmers can build and maintain much more sophisticated systems.
+The benefits of such a system are obvious: programmers spend far more of their time creating good programs and far less time getting those programs to work.
+Fewer programmers build and maintain much more sophisticated systems.
 Customers get much more for much less.
 
-With such amazing business value, why isn't everyone already building and using systems this way?
+With such amazing business value, why isn't everyone creating systems this way?
 There is a cost: the significant change in the mental model of programming.
-Most programmers are not trained or experienced in this kind of mental shift, or thinking at this level of abstraction.
+Most programmers are not trained or experienced in this kind of mental shift or in thinking at this level of abstraction.
 Our goal in this book is to simplify these ideas to make them more easily adoptable.
 
-In addition, programmers are understandably suspicious of _the next great thing_.
+Programmers are understandably suspicious of _the next great thing_.
 We have all been taken in by promises that have not panned out.
 Perhaps the biggest has been object-oriented programming (OOP).
 OOP has probably had such staying power because it had types (a great thing) at its core; unfortunately, it also saddled us with inheritance.
@@ -63,8 +64,7 @@ It's worth considering the costs before jumping into the mix.
 
 ## The Model
 
-To achieve this magical behavior, we need to change some things about how programs work:
+To achieve this magical behavior, we must change program creation:
 
-1. Each operation must keep track of anything they do that touches the environment. This is necessary to allow the magical "operating system" to keep track of the influence of that operation so it can take it into account when running the program.
-2. An operation must communicate all details of environmental effects to other operations, so the "operating environment" can coordinate that operation with other operations as well as manage concurrency.
-3. Operations must be represented as "runnable elements." This gives the "operating environment" the flexibility to decide when and how to execute those operations.
+1. Each operation keeps track of anything it does that touches the environment. An operation must communicate all details of environmental effects to other operations, so the "operating environment" can coordinate that operation with other operations as well as manage concurrency.
+2. Operations must be represented as "runnable elements." This gives the "operating environment" the flexibility to decide when and how to execute those operations.
