@@ -10,6 +10,9 @@ All that custom, duplicated code coalesced into a layer maintained separately fr
 This dramatically increased programming value by eliminating all the specialized coding and debugging necessary to talk to the hardware.
 It also created the possibility to write portable programs, at least within the same operating system across different hardware.
 
+- C language and library
+- Virtual machines
+
 Although the operating system was a great step forward, from a higher perspective it is still a rather primitive step.
 The programmer must still think about many low-level details.
 It's a slightly higher abstraction, but we must still write, debug, and maintain too much code for performing the same tasks over and over again for each new program.
