@@ -1,14 +1,15 @@
 "Operating Environment"
 "Concurrency" == async and parallel
+Operating system competitions
 
 Early programmers wrote directly to the hardware. 
-Each program had to understand how to manipulate the particular hardware it ran on, and this was true even on large, expensive machines.
-This generated large amounts of duplicated code and required rewrites to run the software on different machines.
+Each program understood how to manipulate the particular hardware it ran on, and this was true even on large, expensive machines.
+This generated much duplicated code and required rewrites to run the software on different machines.
 
 Operating systems provided a common interface to the underlying hardware.
 All that custom, duplicated code coalesced into a layer maintained separately from user programs.
-This dramatically increased programming value by eliminating all the specialized coding and debugging necessary to talk to the hardware.
-It also created the possibility to write portable programs, at least within the same operating system across different hardware.
+This dramatically increased programming value by eliminating the specialized coding and debugging necessary to talk to the hardware.
+It also created the possibility to write portable programs, within the same operating system but across different hardware.
 
 - C language and library
 - Virtual machines
